@@ -246,6 +246,19 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate, WKNavi
             if let mutableRequest = (request as NSURLRequest).mutableCopy() as? NSMutableURLRequest {
                 for (key, value) in headers! {
                     mutableRequest.setValue(value, forHTTPHeaderField: key)
+                    if let pitchbubble: String = value.components(separatedBy: ";")[0].components(separatedBy: "=")[1] {
+                        print(pitchbubble)
+                        if let cookie = HTTPCookie(properties: [HTTPCookiePropertyKey.value : pitchbubble, HTTPCookiePropertyKey.name: "pitchbubble.sid", HTTPCookiePropertyKey.path: "/", HTTPCookiePropertyKey.originURL: url.absoluteString]) {
+                            HTTPCookieStorage.shared.setCookie(cookie)
+                            if #available(iOS 11.0, *) {
+                                self.configuration.websiteDataStore.httpCookieStore.setCookie(cookie) {
+                                    print("Cookie set")
+                                }
+                            }
+                        }
+                        
+                    }
+                    mutableRequest.allHTTPHeaderFields = headers ?? [:]
                 }
                 request = mutableRequest as URLRequest
             }
